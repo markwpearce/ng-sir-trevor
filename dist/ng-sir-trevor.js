@@ -75,28 +75,27 @@ angular
                 scope.editor.get = function() {
                     var list = [];
                     // sort blocks by index.
-                    scope.editor.blocks.sort(function(a, b) {
+                    scope.editor.block_manager.blocks.sort(function(a, b) {
                         return (a.$el.index() - b.$el.index());
                     });
-                    angular.each(scope.editor.blocks, function(block) {
-                        scope.editor.saveBlockStateToStore(block);
+                    angular.forEach(scope.editor.block_manager.blocks, function(block) {
+                        scope.editor.validateAndSaveBlock(block);
                         list.push(opts.transform.get(block));
                     });
                     return list;
                 };
                 scope.editor.set = function(list) {
                     var item;
-                    angular.each(list, function(block) {
+                    angular.forEach(list, function(block) {
                         item = opts.transform.set(block);
-                        scope.editor.createBlock(item.type, item.data);
+                        scope.editor.block_manager.createBlock(item.type, item.data);
                     });
                 };
 
                 scope.editor.clear = function() {
-                    angular.each(scope.editor.blocks, function(block) {
-                        block.remove();
+                    angular.forEach(scope.editor.block_manager.blocks, function(block) {
+                        scope.editor.block_manager.removeBlock(block.blockID);
                     });
-                    scope.editor.dataStore.data = [];
                 };
                 // @TODO: investigate how to better `digest` out of $scope  variables.
                 // scope.$watchCollection('editor.blocks', function(blocks) {
