@@ -10,7 +10,8 @@ var gulp = require('gulp'),
       'src/ngSirTrevor/filters/**/*.js',
       'src/ngSirTrevor/services/**/*.js',
       'src/ngSirTrevor/ngSirTrevor.suffix'
-    ];
+    ],
+    connect = require('gulp-connect');
 
 gulp.task('build', function() {
   gulp.src(sourceFiles)
@@ -52,3 +53,24 @@ gulp.task('test-dist-minified', function (done) {
 });
 
 gulp.task('default', ['test-src', 'build']);
+
+
+/**
+ * Run simple server
+ */
+gulp.task('serve', ['default'], function() {
+  connect.server();
+});
+
+
+/**
+ * Watches files and run simple server
+ */
+gulp.task('watch', ['build'], function(done) {
+  karma.start({
+    configFile: __dirname + '/karma-src.conf.js',
+    singleRun: false
+  }, done);
+  gulp.watch('./src/**', ['build']);
+  connect.server();
+});

@@ -1,0 +1,24 @@
+<html ng-app="SirTrevorExample">
+  <head>
+    <title>ngSirTrevorExample</title>
+    <link rel="stylesheet" type="text/css" href="../bower/sir-trevor-js/sir-trevor.css">
+    <link rel="stylesheet" type="text/css" href="../bower/sir-trevor-js/sir-trevor-icons.css">
+  </head>
+  <body>
+    <h1>Sir Trevor Example</h1>
+    <div ng-controller="ExampleController as ctrl">
+      {{ctrl.sirTrevorData}}
+      <hr>
+      <form>
+        <ng-sir-trevor st-editor="ctrl.editor" st-params="ctrl.options" st-data="ctrl.sirTrevorData">
+        </ng-sir-trevor>
+      </form>
+    </div>
+    <script type="text/javascript" src='../bower/angular/angular.js'></script>
+    <script type="text/javascript" src='../dist/ng-sir-trevor.js'></script>
+    <script type="text/javascript" src='../bower/jquery/jquery.js'></script>
+    <script type="text/javascript" src='../bower/Eventable/eventable.js'></script>
+    <script type="text/javascript" src='../bower/sir-trevor-js/sir-trevor.js'></script>
+    <script type="text/javascript" src='script.js'></script>
+  </body>
+</html>

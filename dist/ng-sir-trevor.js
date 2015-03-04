@@ -53,7 +53,8 @@ angular
             options = opts;
         };
     })
-    .directive('ngSirTrevor', ['SirTrevor', 'SirTrevorOptions', function(SirTrevor, options) {
+    .directive('ngSirTrevor', ['SirTrevor', 'SirTrevorOptions', '$timeout',
+            function(SirTrevor, options, $timeout) {
         var directive = {
             template: function(element, attr) {
                 var str = '<textarea class="sir-trevor" name="content"></textarea>';
@@ -64,26 +65,42 @@ angular
                 return str;
             },
             scope: {
-                'editor': '=stModel',
-                'params': '=stParams'
+                'editor': '=stEditor',
+                'params': '=stParams',
+                'data': '=stData',
+                'alwaysCheckValidation': '=?stAlwaysValidate'
             },
+            controller: ['$scope', function($scope) {
+                if(!$scope.data) {
+                    $scope.data = [];
+                }
+
+            }],
             link: function (scope, element, attrs) {
                 var opts = angular.copy(options);
                 angular.extend(opts, scope.params);
                 opts.el = $(element.find('textarea'));
                 scope.editor = new SirTrevor.Editor(opts);
-                scope.editor.get = function() {
+
+                var writeOutput = function() {
+                  $timeout( function() {
+                    scope.data = scope.editor.get(scope.alwaysCheckValidation);
+                  });
+                };
+
+                scope.editor.get = function(shouldValidate) {
                     var list = [];
                     // sort blocks by index.
                     scope.editor.block_manager.blocks.sort(function(a, b) {
                         return (a.$el.index() - b.$el.index());
                     });
                     angular.forEach(scope.editor.block_manager.blocks, function(block) {
-                        scope.editor.validateAndSaveBlock(block);
+                        scope.editor.validateAndSaveBlock(block, shouldValidate);
                         list.push(opts.transform.get(block));
                     });
                     return list;
                 };
+
                 scope.editor.set = function(list) {
                     var item;
                     angular.forEach(list, function(block) {
@@ -97,14 +114,44 @@ angular
                         scope.editor.block_manager.removeBlock(block.blockID);
                     });
                 };
-                // @TODO: investigate how to better `digest` out of $scope  variables.
-                // scope.$watchCollection('editor.blocks', function(blocks) {
-                //     var list = [];
-                //     _.each(blocks, function(block) {
-                //         list.push(scope.editor.get(block));
-                //     });
-                //     scope.model = list;
-                // });
+
+                // Add events to trigger Digest Cycle
+
+                // Javascript/jQuery events
+                scope.editor.$form.keypress(function(){scope.$digest();});
+                scope.editor.$form.click(function(){scope.$digest();});
+                scope.editor.$form.mousedown(function(){scope.$digest();});
+                scope.editor.$form.mouseup(function(){scope.$digest();});
+                scope.editor.$form.bind("cut copy paste",
+                    function() {
+                        $timeout( function() {
+                            scope.$digest();
+                        });
+                    }
+                );
+                $(".st-format-bar").click(function(){ scope.$digest(); });
+
+                //SirTrevor events
+                SirTrevor.EventBus.on('block:create:new', function(){scope.$digest();});
+                SirTrevor.EventBus.on('block:create:existing', function(){scope.$digest();});
+                SirTrevor.EventBus.on('block:remove', function(){scope.$digest();});
+                SirTrevor.EventBus.on('block:reorder:dropped',function(){scope.$digest();});
+                SirTrevor.EventBus.on('formatter:hide', function(){scope.$digest();});
+                SirTrevor.EventBus.on('formatter:position', function(){scope.$digest();});
+
+                // Watch editor form for changes
+                scope.$watch(function() {
+                    return scope.editor.$form.html();
+                  }, function() {
+                      writeOutput();
+                });
+
+                // Initialize data
+                if(angular.isArray(scope.data)) {
+                  scope.editor.set(scope.data)
+                }
+                writeOutput();
+
             }
         };
         return directive;

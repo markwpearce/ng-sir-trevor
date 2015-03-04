@@ -14,17 +14,18 @@ describe('', function() {
 
     describe('ng-sir-trevor directive', function() {
 
-      var scope, element;
+      var scope, element, $timeout;
 
-      beforeEach((inject(function($compile, $rootScope){
+      beforeEach((inject(function($compile, $rootScope, _$timeout_){
         scope = $rootScope.$new();
-        scope.model = {};
+        $timeout = _$timeout_;
+        scope.editor = {};
         scope.options = {
           blockTypes: [
-            "text"
+            "Text"
           ]
         };
-        var elementHtml = '<ng-sir-trevor st-model="model" st-params="options">';
+        var elementHtml = '<ng-sir-trevor st-editor="editor" st-params="options" st-data="output">';
         element = $compile(elementHtml)(scope);
         scope.$digest();
       })));
@@ -40,31 +41,36 @@ describe('', function() {
 
       it('should create a sir trevor editor bound to scope', function() {
         expect(element).to.be.ok;
-        expect(element.children().children()[0].id).to.eql(scope.model.ID);
+        expect(element.children().children()[0].id).to.eql(scope.editor.ID);
       });
 
       it('should have get, set and clear functions on the editor', function() {
-        expect(angular.isFunction(scope.model.get)).to.be.ok;
-        expect(angular.isArray(scope.model.get())).to.be.ok;
-        expect(scope.model.get()).to.eql([]);
+        expect(angular.isFunction(scope.editor.get)).to.be.ok;
+        expect(angular.isArray(scope.editor.get())).to.be.ok;
+        expect(scope.editor.get()).to.eql([]);
 
         var data =[{type:"text",data:{text:"Test Text"}}];
 
-        expect(angular.isFunction(scope.model.set)).to.be.ok;
-        scope.model.set(data);
-        var outputData = scope.model.get();
+        expect(angular.isFunction(scope.editor.set)).to.be.ok;
+        scope.editor.set(data);
+        var outputData = scope.editor.get();
+        expect(outputData.length).to.eql(1);
         outputData.forEach(function(outputBlock, index) {
           expect(outputBlock.type).to.eql(data[index].type);
           expect(outputBlock.data).to.eql(data[index].data);
-
         });
+        expect(angular.isFunction(scope.editor.clear)).to.be.ok;
+        scope.editor.clear();
+        expect(scope.editor.get()).to.eql([]);
+      });
 
-
-        expect(angular.isFunction(scope.model.clear)).to.be.ok;
-        scope.model.clear();
-        expect(scope.model.get()).to.eql([]);
-
-
+      it('should bind to ng-model attribute', function() {
+        expect(scope.output.length).to.eql(0);
+        var data =[{type:"text",data:{text:"Test Text"}}];
+        scope.editor.set(data);
+        scope.$digest();
+        $timeout.flush();
+        expect(scope.output.length).to.eql(1);
       });
 
     });
