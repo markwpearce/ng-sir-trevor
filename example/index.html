@@ -7,6 +7,8 @@
   <body>
     <h1>Sir Trevor Example</h1>
     <div ng-controller="ExampleController as ctrl">
+      <button ng-click="ctrl.clear()">Clear</button>
+      <button ng-click="ctrl.reset()">Reset</button>
       {{ctrl.sirTrevorData}}
       <hr>
       <form>

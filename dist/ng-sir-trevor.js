@@ -81,6 +81,8 @@ angular
                 angular.extend(opts, scope.params);
                 opts.el = $(element.find('textarea'));
                 scope.editor = new SirTrevor.Editor(opts);
+                //HACK - Sir Trevor v0.4.3 has a breaking bug in its destroy funvtion.
+                scope.editor.blocks =[];
 
                 var writeOutput = function() {
                   $timeout( function() {
@@ -104,6 +106,7 @@ angular
                 scope.editor.set = function(list) {
                     var item;
                     angular.forEach(list, function(block) {
+                        block = angular.copy(block);
                         item = opts.transform.set(block);
                         scope.editor.block_manager.createBlock(item.type, item.data);
                     });
@@ -113,6 +116,9 @@ angular
                     angular.forEach(scope.editor.block_manager.blocks, function(block) {
                         scope.editor.block_manager.removeBlock(block.blockID);
                     });
+
+                    scope.editor.blocks = [];
+                    scope.editor.reinitialize(opts);
                 };
 
                 // Add events to trigger Digest Cycle

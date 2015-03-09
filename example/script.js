@@ -1,5 +1,5 @@
 angular.module('SirTrevorExample', ['SirTrevor'])
-  .controller('ExampleController', ['SirTrevor', '$scope', function(SirTrevor, $scope){
+  .controller('ExampleController', ['SirTrevor', '$timeout', function(SirTrevor, $timeout){
 
     var ctrl = this;
 
@@ -21,5 +21,20 @@ angular.module('SirTrevorExample', ['SirTrevor'])
         text: "Hello! This is a doubly-bound Sir Trevor editor! Awesome."
       }
     }];
+
+    ctrl.originalData = angular.copy(ctrl.sirTrevorData);
+
+    ctrl.clear = function() {
+      $timeout(function() {
+        ctrl.editor.clear();
+      });
+    };
+
+    ctrl.reset = function() {
+      $timeout(function() {
+        ctrl.editor.clear();
+        ctrl.editor.set(ctrl.originalData);
+      });
+    };
 
  }]);
